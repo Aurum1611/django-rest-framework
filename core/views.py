@@ -40,7 +40,18 @@ class CustomerViewSet(viewsets.ModelViewSet):
         
         serializer = CustomerSerializer(customer)
         return Response(serializer.data)
-
+    
+    def partial_update(self, request, *args, **kwargs):
+        customer = self.get_object()
+        # change the value only when a new value parameter is passed for that object
+        customer.name = request.data.get('name', customer.name)
+        customer.addr = request.data.get('addr', customer.addr)
+        customer.data_sheet_id = request.data.get('data_sheet', customer.data_sheet_id)
+        customer.save()
+        
+        serializer = CustomerSerializer(customer)
+        return Response(serializer.data)
+    
 
 class ProfessionViewSet(viewsets.ModelViewSet):
     queryset = Profession.objects.all()

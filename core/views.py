@@ -10,8 +10,13 @@ class CustomerViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerSerializer
 
     def get_queryset(self):
-        active_customers = Customer.objects.all().order_by('-active')  # .filter(active=True)
-        return active_customers
+        addr = self.request.query_params.get('addr')
+        status = False if self.request.query_params.get('status') == 'False' else True
+        if addr:
+            customers = Customer.objects.filter(addr__contains=addr, active=status)
+        else:
+            customers = Customer.objects.all().order_by('-active')
+        return customers
 
     def list(self, request, *args, **kwargs):
         # Can directly query objects here, method not needed.

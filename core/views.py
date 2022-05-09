@@ -10,7 +10,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerSerializer
 
     def get_queryset(self):
-        active_customers = Customer.objects.all().order_by('-active')   #.filter(active=True)
+        active_customers = Customer.objects.all().order_by('-active')  # .filter(active=True)
         return active_customers
 
     def list(self, request, *args, **kwargs):
@@ -30,7 +30,8 @@ class CustomerViewSet(viewsets.ModelViewSet):
         data = request.data
 
         customer = Customer.objects.create(
-            name=data['name'], addr=data['addr'],
+            name=data['name'],
+            addr=data['addr'],
             data_sheet_id=data['data_sheet'],
         )
 
@@ -57,7 +58,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         customer = self.get_object()
         customer.delete()
-        return Response('Object Deleted', status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     # By default, all object will run the method.
     # When detail=True, only that specific object `customers/3/deactivate` will run it.

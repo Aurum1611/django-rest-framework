@@ -26,6 +26,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
         serializer = CustomerSerializer(obj)
         return Response(serializer.data)
 
+    # Postman parameters must be passed through the body section. 
+    # They are not received through params, header or other section.
+    # request.data will be empty in this case.
     def create(self, request, *args, **kwargs):
         data = request.data
 

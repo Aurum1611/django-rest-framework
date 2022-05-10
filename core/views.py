@@ -4,10 +4,13 @@ from .serializers import CustomerSerializer, ProfessionSerializer, \
     DocumentSerializer, DataSheetSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerSerializer
+    filter_backends = [DjangoFilterBackend] # Locally enable DFB for current viewset.
+    filterset_fields = ['name',]
 
     def get_queryset(self):
         addr = self.request.query_params.get('addr')
@@ -18,11 +21,13 @@ class CustomerViewSet(viewsets.ModelViewSet):
             customers = Customer.objects.all().order_by('-active')
         return customers
 
-    def list(self, request, *args, **kwargs):
-        # Can directly query objects here, method not needed.
-        customers = self.get_queryset()
-        serializer = CustomerSerializer(customers, many=True)
-        return Response(serializer.data)
+    # If we want to use DjangoFilterBackend by defining filterset_fields,
+    # list cannot be overriden or we'll have to add DjangoFilterBackend code in list method.
+    # def list(self, request, *args, **kwargs):
+    #     # Can directly query objects here, method not needed.
+    #     customers = self.get_queryset()
+    #     serializer = CustomerSerializer(customers, many=True)
+    #     return Response(serializer.data)
 
     # Function called when a specific object is requested through the endpoint.
     # Example: `/customers/3/` where 3 is the pk argument which will be used to retrieve the data.

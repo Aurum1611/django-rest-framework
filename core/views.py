@@ -5,16 +5,20 @@ from .serializers import CustomerSerializer, ProfessionSerializer, \
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerSerializer
     filter_backends = [DjangoFilterBackend, # Locally enable DFB for current viewset.
-                       SearchFilter,]
+                       SearchFilter,
+                       OrderingFilter,]
     filterset_fields = ['name',]
     # data_sheet__description is searching in a foreign relation data_sheet in the description field.
     search_fields = ['name', 'addr', 'data_sheet__description',]
+    ordering_fields = ['id', 'name', 'active']
+    ordering = ('-id')   # Default ordering
+    # lookup_field = 'name' # Can use another unique property instead of id to access an obj.
 
     def get_queryset(self):
         addr = self.request.query_params.get('addr')

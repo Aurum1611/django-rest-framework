@@ -22,6 +22,12 @@ class Customer(models.Model):
     profession = models.ManyToManyField(Profession)
     data_sheet = models.OneToOneField(DataSheet, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
+    
+    @property
+    def profession_titles(self):
+        pids = [p.id for p in self.profession.all()]
+        profs = Profession.objects.filter(id__in=pids)
+        return [p.description for p in profs]
 
     def __str__(self):
         return self.name

@@ -28,6 +28,9 @@ class Customer(models.Model):
         pids = [p.id for p in self.profession.all()]
         profs = Profession.objects.filter(id__in=pids)
         return [p.description for p in profs]
+    
+    def num_profs(self):
+        return self.profession.all().count()
 
     def __str__(self):
         return self.name

@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import AllowAny
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -19,6 +21,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
     ordering_fields = ['id', 'name', 'active']
     ordering = ('-id')   # Default ordering
     # lookup_field = 'name' # Can use another unique property instead of id to access an obj.
+    
+    # Enable token auth
+    authentication_classes = [TokenAuthentication,]
 
     def get_queryset(self):
         addr = self.request.query_params.get('addr')
@@ -113,3 +118,6 @@ class DocumentViewSet(viewsets.ModelViewSet):
 class DataSheetViewSet(viewsets.ModelViewSet):
     queryset = DataSheet.objects.all()
     serializer_class = DataSheetSerializer
+    
+    # Let anyone access DataSheet endpoint without authentication
+    permission_classes = [AllowAny,]

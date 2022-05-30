@@ -2,10 +2,18 @@ from rest_framework import serializers
 from .models import Customer, Profession, Document, DataSheet
 
 
+class DataSheetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DataSheet
+        fields = ('id', 'description', 'historical_data')
+
+
 class CustomerSerializer(serializers.ModelSerializer):
     num_professions = serializers.SerializerMethodField()
-    data_sheet = serializers.StringRelatedField()   # calls __str__ on data_sheet obj and shows result
-    # many=True for any field that can have multiple values
+    data_sheet = DataSheetSerializer()  # nested serializer
+    
+    # StringRelatedField calls __str__ on data_sheet obj and shows result
+    # many=True required for any field that can have multiple values like fk or many-to-many fields
     document_set = serializers.StringRelatedField(many=True)    # document has customer fk so the relation
     profession = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     
@@ -29,9 +37,3 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = ('id', 'dtype', 'doc_num', 'customer')
-
-
-class DataSheetSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DataSheet
-        fields = ('id', 'description', 'historical_data')

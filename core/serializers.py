@@ -7,7 +7,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     data_sheet = serializers.StringRelatedField()   # calls __str__ on data_sheet obj and shows result
     # many=True for any field that can have multiple values
     document_set = serializers.StringRelatedField(many=True)    # document has customer fk so the relation
-    profession = serializers.StringRelatedField(many=True)
+    profession = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     
     
     class Meta:

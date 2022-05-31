@@ -1,35 +1,41 @@
 from rest_framework import viewsets, status
 from .models import Customer, Profession, Document, DataSheet
-from .serializers import CustomerSerializer, ProfessionSerializer, \
-    DocumentSerializer, DataSheetSerializer
+from .serializers import (CustomerSerializer, ProfessionSerializer,
+    DocumentSerializer, DataSheetSerializer)
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import AllowAny
+from rest_framework.authentication import (TokenAuthentication, 
+    BasicAuthentication)
+from rest_framework.permissions import (
+    IsAdminUser, IsAuthenticatedOrReadOnly,
+    DjangoModelPermissionsOrAnonReadOnly,
+)
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerSerializer
-    filter_backends = [DjangoFilterBackend, # Locally enable DFB for current viewset.
+    filter_backends = [DjangoFilterBackend,  # Locally enable DFB for current viewset.
                        SearchFilter,
-                       OrderingFilter,]
-    filterset_fields = ['name',]
+                       OrderingFilter, ]
+    filterset_fields = ['name', ]
     # data_sheet__description is searching in a foreign relation data_sheet in the description field.
-    search_fields = ['name', 'addr', 'data_sheet__description',]
+    search_fields = ['name', 'addr', 'data_sheet__description', ]
     ordering_fields = ['id', 'name', 'active']
     ordering = ('-id')   # Default ordering
     # lookup_field = 'name' # Can use another unique property instead of id to access an obj.
-    
+
     # Enable token auth
-    authentication_classes = [TokenAuthentication,]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
 
     def get_queryset(self):
         addr = self.request.query_params.get('addr')
-        status = False if self.request.query_params.get('status') == 'False' else True
+        status = False if self.request.query_params.get(
+            'status') == 'False' else True
         if addr:
-            customers = Customer.objects.filter(addr__contains=addr, active=status)
+            customers = Customer.objects.filter(
+                addr__contains=addr, active=status)
         else:
             customers = Customer.objects.all().order_by('-active')
         return customers
@@ -49,7 +55,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
         serializer = CustomerSerializer(obj)
         return Response(serializer.data)
 
-    # Postman parameters must be passed through the body section. 
+    # Postman parameters must be passed through the body section.
     # They are not received through params, header or other section.
     # request.data will be empty in this case.
     def create(self, request, *args, **kwargs):
@@ -108,16 +114,19 @@ class CustomerViewSet(viewsets.ModelViewSet):
 class ProfessionViewSet(viewsets.ModelViewSet):
     queryset = Profession.objects.all()
     serializer_class = ProfessionSerializer
+    permission_classes = [IsAdminUser, ]
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+    authentication_classes = [TokenAuthentication, ]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
 
 
 class DataSheetViewSet(viewsets.ModelViewSet):
     queryset = DataSheet.objects.all()
     serializer_class = DataSheetSerializer
-    
+
     # Let anyone access DataSheet endpoint without authentication
-    permission_classes = [AllowAny,]
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly,]

@@ -58,22 +58,22 @@ class CustomerViewSet(viewsets.ModelViewSet):
     # Postman parameters must be passed through the body section.
     # They are not received through params, header or other section.
     # request.data will be empty in this case.
-    def create(self, request, *args, **kwargs):
-        data = request.data
+    # def create(self, request, *args, **kwargs):
+    #     data = request.data
 
-        customer = Customer.objects.create(
-            name=data['name'],
-            addr=data['addr'],
-            data_sheet_id=data['data_sheet'],
-        )
+    #     customer = Customer.objects.create(
+    #         name=data['name'],
+    #         addr=data['addr'],
+    #         data_sheet_id=data['data_sheet'],
+    #     )
 
-        profession = Profession.objects.get(id=data['profession'])
-        customer.profession.add(profession)
+    #     profession = Profession.objects.get(id=data['profession'])
+    #     customer.profession.add(profession)
 
-        customer.save()
+    #     customer.save()
 
-        serializer = CustomerSerializer(customer)
-        return Response(serializer.data)
+    #     serializer = CustomerSerializer(customer)
+    #     return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
         customer = self.get_object()

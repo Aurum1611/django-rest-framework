@@ -12,6 +12,9 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = ('id', 'dtype', 'doc_num', 'customer')
+        
+        # writeable fk fields, customer obj doesn't exist to be passed as input so make it read_only
+        read_only_fields = ('customer',)
 
 
 class ProfessionSerializer(serializers.ModelSerializer):
@@ -27,7 +30,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     # StringRelatedField calls __str__ on data_sheet obj and shows result
     # many=True required for any field that can have multiple values like fk or many-to-many fields
     # document_set = serializers.StringRelatedField(many=True)    # document has customer fk so the relation
-    document_set = DocumentSerializer(many=True, read_only=True)
+    document_set = DocumentSerializer(many=True)
     # profession = serializers.PrimaryKeyRelatedField(many=True)
     profession = ProfessionSerializer(many=True)
     
@@ -41,10 +44,22 @@ class CustomerSerializer(serializers.ModelSerializer):
         profession = validated_data['profession']
         del validated_data['profession']
         
+        document_set = validated_data['document_set']
+        del validated_data['document_set']
+        
         customer = Customer.objects.create(**validated_data)
         
+        for doc in document_set:
+            Document.objects.create(
+                dtype = doc['dtype'],
+                doc_num = doc['doc_num'],
+                customer_id = customer.id
+            )
+        
         for p in profession:
-            prof = Profession.objects.create(**p)
+            prof = Profession.objects.get(description=p['description'])
+            if not prof:
+                prof = Profession.objects.create(**p)
             customer.profession.add(prof)
         
         customer.save()

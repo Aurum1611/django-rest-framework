@@ -25,7 +25,7 @@ class ProfessionSerializer(serializers.ModelSerializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     num_professions = serializers.SerializerMethodField()
-    data_sheet = DataSheetSerializer(read_only=True)  # nested serializer
+    data_sheet = DataSheetSerializer()
     
     # StringRelatedField calls __str__ on data_sheet obj and shows result
     # many=True required for any field that can have multiple values like fk or many-to-many fields
@@ -47,7 +47,14 @@ class CustomerSerializer(serializers.ModelSerializer):
         document_set = validated_data['document_set']
         del validated_data['document_set']
         
+        data_sheet = validated_data['data_sheet']
+        del validated_data['data_sheet']
+        
+        d_sheet = DataSheet.objects.create(**data_sheet)
+        
         customer = Customer.objects.create(**validated_data)
+        
+        customer.data_sheet = d_sheet
         
         for doc in document_set:
             Document.objects.create(
